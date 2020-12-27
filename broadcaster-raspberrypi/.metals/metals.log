@@ -1,0 +1,13 @@
+INFO  time: initialize in 0.4s
+WARN  no build target: /Users/han/Work/codes/java/walcron-locker/src/main/scala/Main.scala
+WARN  no build target: /Users/han/Work/codes/java/walcron-locker/src/main/scala/com/walcron/twice/QueueReader.scala
+INFO  no build target: using presentation compiler with only scala-library
+WARN  code navigation does not work for the file '/Users/han/Work/codes/java/walcron-locker/src/main/scala/com/walcron/twice/QueueReader.scala' because it doesn't belong to a build target.
+WARN  code navigation does not work for the file '/Users/han/Work/codes/java/walcron-locker/src/main/scala/com/walcron/twice/QueueReader.scala' because it doesn't belong to a build target.
+WARN  no build target: /Users/han/Work/codes/java/walcron-locker/src/main/scala/com/walcron/twice/api/Triggers.scala
+INFO  shutting down Metals
+INFO  time: initialize in 0.29s
+INFO  skipping build import with status 'Requested'
+WARN  no build target: /Users/han/Work/codes/java/walcron-locker/src/main/scala/com/walcron/twice/api/Triggers.scala
+INFO  no build target: using presentation compiler with only scala-library
+INFO  shutting down Metals
