@@ -12,7 +12,7 @@ class LejosCall(ipAddress: String, port: Int) {
       val inetConnection = new InetSocketAddress(ipAddress, port)
       val clientSocket = new Socket()
       clientSocket.connect(inetConnection, 5000)
-      val out = clientSocket.getOutputStream
+      val out = new PrintWriter(clientSocket.getOutputStream, true)
 
       out.write("A:L:03601000100")
       out.close()
