@@ -1,18 +1,22 @@
 package com.walcron.twice.api
 
-import java.io.PrintWriter
-import java.net.Socket
+import java.io._
+import java.net._
 
 class LejosCall(ipAddress: String, port: Int) {
-  val clientSocket = new Socket(ipAddress, port)
-  val out = new PrintWriter(clientSocket.getOutputStream, true)
-
   def triggerDevice(shouldRun: Boolean):Unit = {
     import java.io.PrintWriter
     import java.net.Socket
 
     if(shouldRun) {
+      val inetConnection = new InetSocketAddress(ipAddress, port)
+      val clientSocket = new Socket()
+      clientSocket.connect(inetConnection, 5000)
+      val out = clientSocket.getOutputStream
+
       out.write("A:L:03601000100")
+      out.close()
+      clientSocket.close()
     }
   }
 

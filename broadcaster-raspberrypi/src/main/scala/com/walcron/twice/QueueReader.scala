@@ -14,7 +14,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.serialization.{StringDeserializer, StringSerializer}
 
 class QueueReader(applicationSetting: ApplicationSetting, brokers: String, username: String, password: String, topics: Array[String], frequencyInMilliseconds: Long) extends Actor {
-  printf("Started Queue Reader")
+  println("Started Queue Reader")
 
   private val serializer: String = classOf[StringSerializer].getName
   private val deserializer: String = classOf[StringDeserializer].getName
@@ -49,7 +49,7 @@ class QueueReader(applicationSetting: ApplicationSetting, brokers: String, usern
     while (true) {
       val records = consumer.poll(Duration.ofMillis(frequencyInMilliseconds)).asScala.toVector
       for (record <- records) {
-        printf("%s [%d] offset=%d, key=%s, value=\"%s\"\n", record.topic, record.partition, record.offset, record.key, record.value)
+        printf("### %s [%d] offset=%d, key=%s, value=\"%s\"\n", record.topic, record.partition, record.offset, record.key, record.value)
         val value: String = record.value
         try {
           val result = mapper.readValue(value, classOf[KafkaHome])
@@ -72,10 +72,8 @@ class QueueReader(applicationSetting: ApplicationSetting, brokers: String, usern
             case 5 => {
               lazy val lejosCall = new LejosCall(applicationSetting.lejosUrl, applicationSetting.lejosPort)
 
-              if(homeAction.on.isDefined && homeAction.on.get) {
-                if(homeAction.isRunning.isDefined) {
-                  lejosCall.triggerDevice(homeAction.isRunning.get)
-                }
+              if(homeAction.on.isDefined) {
+                lejosCall.triggerDevice(homeAction.on.get)
               }
             }
             case _ => {}
