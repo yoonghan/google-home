@@ -12,13 +12,11 @@ import com.walcron.lejos.motors.CommandMailbox;
 public class LocalServer extends Thread {
 
 	private final int portNumber;
-	private final CommandExecutor commandExecutor;
 	private volatile boolean running = true;
 	
 	public LocalServer(int portNumber) {
 		super();
 		this.portNumber = portNumber;
-		this.commandExecutor = new CommandExecutor();
 	}
 
 	public void run() {
@@ -26,21 +24,29 @@ public class LocalServer extends Thread {
 		try(ServerSocket serverSocket = new ServerSocket(portNumber)){
 			while(running) {
 				try (
-				    Socket clientSocket = serverSocket.accept();
-				    BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+				    final Socket clientSocket = serverSocket.accept();
 				) {
-					    char[] cbuf = new char[CommandExecutor.LENGTH_OF_COMMAND];
-					    while(in.read(cbuf) > 0) {
-					    	CommandMailbox.INSTANCE.addCommand(String.valueOf(cbuf));
-					    	System.out.println("Push to Queue");
-					    	try {
-								Thread.sleep(500);
+					Runnable clientListener = () -> {
+						try (
+								final BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+						){
+							char[] cbuf = new char[CommandExecutor.LENGTH_OF_COMMAND];
+							while (in.read(cbuf) != -1) {
+								CommandMailbox.INSTANCE.addCommand(String.valueOf(cbuf));
+								System.out.println("Push to Queue");
+								try {
+									Thread.sleep(500);
+								} catch (InterruptedException ie) {
+									System.err.println("Interrupted");
+								}
 							}
-							catch(InterruptedException ie) {
-								System.err.println("Interrupted");
-								this.running = false;
-							}
-					    }
+						}
+						catch(IOException ioe) {
+
+						}
+					};
+
+					new Thread(clientListener).start();
 				}
 				catch(IOException ioe) {
 					ioe.printStackTrace();
