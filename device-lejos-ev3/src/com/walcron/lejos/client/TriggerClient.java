@@ -12,18 +12,21 @@ public class TriggerClient {
 	public TriggerClient() {
 		try (
 		    Socket clientSocket = new Socket(HOST_NAME, PORT);
-		    PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+			PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
 		){
-		    out.write("A:L:03601000100");
+			clientSocket.setKeepAlive(false);
+			clientSocket.setSoTimeout(30_000);
+			
+		    out.write("AX:L:03602000900");
 		    //out.write("\n");
-		    out.write("B:L:-3600010020");
+		    out.write("BX:L:-3602000900");
 		    //out.write("\n");
-		    out.write("C:M:03602000100");
+		    out.write("CX:M:03602000900");
 		    //out.write("\n");
-		    out.write("B:L:-3600010020");
-		    out.write("B:L:-3600010020");
-		    out.write("B:L:-3600010020");
-		    out.write("B:L:-3600010020");
+		    out.write("AB:L:17202000900");
+		    out.flush();
+		    
+		    System.out.println("Completed");
 		}
 		catch (IOException ioe) {
 			ioe.printStackTrace();

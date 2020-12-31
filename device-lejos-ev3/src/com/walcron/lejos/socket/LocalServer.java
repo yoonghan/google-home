@@ -22,10 +22,10 @@ public class LocalServer extends Thread {
 	public void run() {
 
 		try(ServerSocket serverSocket = new ServerSocket(portNumber)){
+			System.out.println("RUNNING");
 			while(running) {
-				try (
-				    final Socket clientSocket = serverSocket.accept();
-				) {
+				try {
+					final Socket clientSocket = serverSocket.accept();
 					Runnable clientListener = () -> {
 						try (
 								final BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -42,7 +42,11 @@ public class LocalServer extends Thread {
 							}
 						}
 						catch(IOException ioe) {
-
+							ioe.printStackTrace();
+							try {
+								clientSocket.close();
+							} catch (IOException e) {
+							}
 						}
 					};
 

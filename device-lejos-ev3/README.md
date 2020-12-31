@@ -12,6 +12,8 @@ Lego will be a receiving device for anything broadcasted by google home (need to
 6. Create a PAN connection so that 10.0.1.1 is the Bluetooth IP address to connect to.
 7. Right-click on Main.java and let it run on EV3 device
 
+*NOTE:* For PAN connection, upload at least twice. The first time normally fails with connection timeout. 
+
 ## Testing
 
 1. Right-click on TriggerClient.java and run as Java Appliction. This will run Large motor on Port A and B, while a medium motor on Port C.
