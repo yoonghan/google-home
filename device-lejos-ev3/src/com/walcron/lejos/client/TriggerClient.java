@@ -17,13 +17,16 @@ public class TriggerClient {
 			clientSocket.setKeepAlive(false);
 			clientSocket.setSoTimeout(30_000);
 			
-		    out.write("AX:L:03602000900");
-		    //out.write("\n");
-		    out.write("BX:L:-3602000900");
-		    //out.write("\n");
-		    out.write("CX:M:03602000900");
-		    //out.write("\n");
-		    out.write("AB:L:17202000900");
+//		    out.write("AX:L:03602000900");
+//		    //out.write("\n");
+//		    out.write("BX:L:-3600000000");
+//		    //out.write("\n");
+//		    out.write("CX:M:03602000900");
+//		    //out.write("\n");
+//		    out.write("AB:L:17202000900");
+		    //Only allow motor 1, rotation is replaced as power, positive forward, negative backward.
+		    out.write("AX:U:00500060000");
+		    
 		    out.flush();
 		    
 		    System.out.println("Completed");

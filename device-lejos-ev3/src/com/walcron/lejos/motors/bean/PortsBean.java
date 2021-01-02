@@ -1,4 +1,4 @@
-package com.walcron.lejos.motors;
+package com.walcron.lejos.motors.bean;
 
 import java.util.Optional;
 

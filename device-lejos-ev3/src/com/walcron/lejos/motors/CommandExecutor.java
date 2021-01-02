@@ -2,11 +2,16 @@ package com.walcron.lejos.motors;
 
 import java.util.Optional;
 
+import com.walcron.lejos.motors.bean.CommandBean;
+import com.walcron.lejos.motors.bean.PortsBean;
+import com.walcron.lejos.motors.bean.MotorsBean;
+
 import lejos.hardware.motor.BaseRegulatedMotor;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.motor.EV3MediumRegulatedMotor;
+import lejos.hardware.motor.UnregulatedMotor;
 import lejos.hardware.port.MotorPort;
-import lejos.hardware.port.Port;
+import lejos.utility.Delay;
 
 public class CommandExecutor extends Thread {
 
@@ -39,93 +44,150 @@ public class CommandExecutor extends Thread {
 	public void translateToMotorCall(String command) {
 		String[] splittedCommand = command.split(":");
 		
-		if(splittedCommand.length == 3 && command.length() == LENGTH_OF_COMMAND) {
-			System.out.println("Executing");
+		if(splittedCommand.length == 3 && 
+				(command.length() == LENGTH_OF_COMMAND)) {
 			CommandBean translatedCommand = new CommandBean(splittedCommand[0], splittedCommand[1], splittedCommand[2]);
 			
 			PortsBean ports = getPort(translatedCommand.getPort());
 			if(ports.getPortOne().isPresent() || ports.getPortTwo().isPresent()) {
-				System.out.println("Running on port:"+splittedCommand[0]);
+				System.out.println("port:"+splittedCommand[0]);
 				
-				RegulatedMotorBean regulatedMotors = getMotorType(translatedCommand.getMotor(), ports);
+				MotorsBean motors = getMotorType(translatedCommand.getMotor(), ports);
 				
-				if(regulatedMotors.getRegulatedMotor1().isPresent() || regulatedMotors.getRegulatedMotor2().isPresent()) {
-					System.out.println("Running on motor:"+splittedCommand[1]);
-					doAction(translatedCommand.getAction(), regulatedMotors);
+				if(motors.hasRegulatedMotorsToRun()) {
+					System.out.println("r-motor:"+splittedCommand[1]);
+					doRegulatedMotorAction(translatedCommand.getAction(), motors);
 				}
+				
+				if(motors.hasUnregulatedMotorsToRun()) {
+					System.out.println("u-motor:"+splittedCommand[1]);
+					doUnregulatedMotorAction(translatedCommand.getAction(), motors);
+				}
+				
+				doMotorClose(motors);
 			}
 		}
 		else {
-			
+			System.err.println("Check length");
 		}
 	}
 	
-	private void doAction(String action, RegulatedMotorBean regulatedMotors) {
+	private void doUnregulatedMotorAction(String action, MotorsBean motors) {
+		//first 4, -100 to 0100
+		int power = Integer.parseInt(action.substring(0, 4), 10);
+		//second 2, 0 to 999 seconds delay
+		int delay = Integer.parseInt(action.substring(4, 7), 10);
+		//rest are dumped...remember socket set to LENGTH_OF_COMMAND
+		System.out.println(String.format("p:%d,d:%d", power, delay));		
+		if(motors.getUnregulatedMotor1().isPresent()) {
+			executeUnregulatedMotorAction(motors.getUnregulatedMotor1().get(), power, delay);
+		}
+	}
+	
+	private void doRegulatedMotorAction(String action, MotorsBean motors) {
 		//first 4, -360 to 0360
 		int rotation = Integer.parseInt(action.substring(0, 4), 10);
 		//second 4, 0000 to 6000
 		int acceleration = Integer.parseInt(action.substring(4, 8), 10);
 		//third 3, 000 to 900
 		int speed = Integer.parseInt(action.substring(8, 11), 10);
-		boolean synch = (regulatedMotors.getRegulatedMotor1().isPresent() && regulatedMotors.getRegulatedMotor2().isPresent());
 		
-		System.out.println(String.format("ro:%d,ac:%d,sp:%d,bt:%b", rotation, acceleration, speed, synch));
+		boolean synch = (motors.getRegulatedMotor1().isPresent() && motors.getRegulatedMotor2().isPresent());
+		
+		System.out.println(String.format("r:%d,a:%d,s:%d,2:%b", rotation, acceleration, speed, synch));
 		
 		if(synch) {
-			regulatedMotors.getRegulatedMotor1().get().startSynchronization();
-			regulatedMotors.getRegulatedMotor2().get().startSynchronization();
+			motors.getRegulatedMotor1().get().startSynchronization();
+			motors.getRegulatedMotor2().get().startSynchronization();
 		}
 		
-		if(regulatedMotors.getRegulatedMotor1().isPresent()) {
-			BaseRegulatedMotor motor1 = regulatedMotors.getRegulatedMotor1().get();
-			motor1.setAcceleration(acceleration);
-			motor1.setSpeed(speed);
-			motor1.rotate(rotation, true);
+		if(motors.getRegulatedMotor1().isPresent()) {
+			executeRegulatedMotorAction(motors.getRegulatedMotor1().get(), acceleration, speed, rotation);
 		}
 		
-		if(regulatedMotors.getRegulatedMotor2().isPresent()) {
-			BaseRegulatedMotor motor2 = regulatedMotors.getRegulatedMotor2().get();
-			motor2.setAcceleration(acceleration);
-			motor2.setSpeed(speed);
-			motor2.rotate(rotation, true);
+		if(motors.getRegulatedMotor2().isPresent()) {
+			executeRegulatedMotorAction(motors.getRegulatedMotor2().get(), acceleration, speed, rotation);
 		}
 		
 		if(synch) {
-			regulatedMotors.getRegulatedMotor1().get().endSynchronization();
-			regulatedMotors.getRegulatedMotor2().get().endSynchronization();
-			
-			
+			motors.getRegulatedMotor1().get().endSynchronization();
+			motors.getRegulatedMotor2().get().endSynchronization();
 		}
+	}
+	
+	private void executeRegulatedMotorAction(BaseRegulatedMotor baseRegulatedMotor, int acceleration, int speed,
+			int rotation) {
+		if(acceleration > 0)
+			baseRegulatedMotor.setAcceleration(acceleration);
+		if(speed > 0)
+			baseRegulatedMotor.setSpeed(speed);
 		
-		if(regulatedMotors.getRegulatedMotor1().isPresent()) {
-			regulatedMotors.getRegulatedMotor1().get().waitComplete();
-			regulatedMotors.getRegulatedMotor1().get().close();
-		}
-		
-		if(regulatedMotors.getRegulatedMotor2().isPresent()) {
-			regulatedMotors.getRegulatedMotor2().get().waitComplete();
-			regulatedMotors.getRegulatedMotor2().get().close();
-		}
-		
+		baseRegulatedMotor.rotate(rotation, true);
 	}
 
-	private RegulatedMotorBean getMotorType(String motorType, PortsBean portsBean) {
+	private void executeUnregulatedMotorAction(UnregulatedMotor unregulatedMotor, int power, int delay) {
+		if(power > 100 ||  power < -100) {
+			System.err.println("Unregulated in 100th range");
+		}
+		else {
+			unregulatedMotor.setPower(power);
+			
+			if(power > 0) {
+				unregulatedMotor.forward();
+			}
+			
+			if(power < 0) {
+				unregulatedMotor.backward();
+			}
+			
+			Delay.msDelay(delay * 1000L);
+			
+			unregulatedMotor.stop();
+		}
+	}
+
+	private void doMotorClose(MotorsBean motors) {
+		if(motors.getRegulatedMotor1().isPresent()) {
+			motors.getRegulatedMotor1().get().waitComplete();
+			motors.getRegulatedMotor1().get().close();
+		}
+		
+		if(motors.getRegulatedMotor2().isPresent()) {
+			motors.getRegulatedMotor2().get().waitComplete();
+			motors.getRegulatedMotor2().get().close();
+		}
+		
+		if(motors.getUnregulatedMotor1().isPresent()) {
+			motors.getUnregulatedMotor1().get().close();
+		}
+	}
+
+	private MotorsBean getMotorType(String motorType, PortsBean portsBean) {
 		switch (motorType) {
 			case "L":
-				return new RegulatedMotorBean(
+				return new MotorsBean(
 						portsBean.getPortOne().isPresent()?
 							Optional.of(new EV3LargeRegulatedMotor(portsBean.getPortOne().get())): Optional.empty(),
 						portsBean.getPortTwo().isPresent()?
-							Optional.of(new EV3LargeRegulatedMotor(portsBean.getPortTwo().get())): Optional.empty()
-						);
-			case "M":
-				return new RegulatedMotorBean(
-						portsBean.getPortOne().isPresent()?
-							Optional.of(new EV3MediumRegulatedMotor(portsBean.getPortOne().get())): Optional.empty(),
+							Optional.of(new EV3LargeRegulatedMotor(portsBean.getPortTwo().get())): Optional.empty(),
 						Optional.empty()
 						);
+			case "M":
+				return new MotorsBean(
+						portsBean.getPortOne().isPresent()?
+							Optional.of(new EV3MediumRegulatedMotor(portsBean.getPortOne().get())): Optional.empty(),
+						Optional.empty(),
+						Optional.empty()
+						);
+			case "U":
+				return new MotorsBean(
+						Optional.empty(),
+						Optional.empty(),
+						portsBean.getPortOne().isPresent()? 
+								Optional.of(new UnregulatedMotor(portsBean.getPortOne().get())): Optional.empty()
+						);
 			default:
-				return new RegulatedMotorBean(Optional.empty(), Optional.empty());
+				return new MotorsBean(Optional.empty(), Optional.empty(), Optional.empty());
 		}
 	}
 
