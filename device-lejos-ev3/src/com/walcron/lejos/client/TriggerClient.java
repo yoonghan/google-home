@@ -19,12 +19,14 @@ public class TriggerClient {
 			
 		    out.write("AX:L:036000002000900"); //forward with control
 		    out.write("BX:L:-36000000000000"); //default backward
-		    out.write("CX:M:036000000000900"); //speed change
+		    out.write("CX:M:036000000000200"); //speed change
 		    out.write("AB:L:072007202000900"); //synch
 		    out.write("AB:L:0720-7200000900"); //turn
 		    
 		    //Only allow motor 1, rotation is replaced as power, positive forward, negative backward.
-		    out.write("AX:U:005000600000000");
+			out.write("CX:U:-05000100000000");
+			out.write("CX:U:005000100000000");
+		    
 		    out.flush();
 		    
 		    System.out.println("Completed");

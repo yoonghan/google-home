@@ -110,7 +110,7 @@ public class CommandExecutor extends Thread {
 			executeRegulatedMotorAction(motors.getRegulatedMotor1().get(), acceleration, speed, rotation1);
 		}
 		
-		if(!synch && motors.getRegulatedMotor2().isPresent()) {
+		if(motors.getRegulatedMotor2().isPresent()) {
 			executeRegulatedMotorAction(motors.getRegulatedMotor2().get(), acceleration, speed, rotation2);
 		}
 		
@@ -135,14 +135,14 @@ public class CommandExecutor extends Thread {
 			System.err.println("Unregulated in 100th range");
 		}
 		else {
-			unregulatedMotor.setPower(power);
-			
-			if(power > 0) {
-				unregulatedMotor.forward();
-			}
+			unregulatedMotor.setPower(Math.abs(power));
 			
 			if(power < 0) {
 				unregulatedMotor.backward();
+			}
+			
+			if(power > 0) {
+				unregulatedMotor.forward();
 			}
 			
 			Delay.msDelay(delay * 1000L);
