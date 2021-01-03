@@ -15,7 +15,7 @@ import lejos.utility.Delay;
 
 public class CommandExecutor extends Thread {
 
-	public static final int LENGTH_OF_COMMAND = 16; //i.e. "AX:L:03601000100"
+	public static final int LENGTH_OF_COMMAND = 20; //i.e. "AX:L:036000001000100"
 	private final long RUNNING_INSTANCE = 1000;
 	private volatile boolean running = true;
 	
@@ -86,15 +86,20 @@ public class CommandExecutor extends Thread {
 	
 	private void doRegulatedMotorAction(String action, MotorsBean motors) {
 		//first 4, -360 to 0360
-		int rotation = Integer.parseInt(action.substring(0, 4), 10);
-		//second 4, 0000 to 6000
-		int acceleration = Integer.parseInt(action.substring(4, 8), 10);
-		//third 3, 000 to 900
-		int speed = Integer.parseInt(action.substring(8, 11), 10);
+		int rotation1 = Integer.parseInt(action.substring(0, 4), 10);
+		//second 4, -360 to 0360
+		int rotation2 = Integer.parseInt(action.substring(4, 8), 10);
+		//third 4, 0000 to 6000
+		int acceleration = Integer.parseInt(action.substring(8, 12), 10);
+		//fourth 3, 000 to 900
+		int speed = Integer.parseInt(action.substring(12, 15), 10);
 		
-		boolean synch = (motors.getRegulatedMotor1().isPresent() && motors.getRegulatedMotor2().isPresent());
+		boolean synch = (
+				motors.getRegulatedMotor1().isPresent() && motors.getRegulatedMotor2().isPresent() &&
+				rotation1 == rotation2
+				);
 		
-		System.out.println(String.format("r:%d,a:%d,s:%d,2:%b", rotation, acceleration, speed, synch));
+		System.out.println(String.format("r1:%d,r2:%d,a:%d,s:%d,2:%b", rotation1, rotation2, acceleration, speed, synch));
 		
 		if(synch) {
 			motors.getRegulatedMotor1().get().startSynchronization();
@@ -102,11 +107,11 @@ public class CommandExecutor extends Thread {
 		}
 		
 		if(motors.getRegulatedMotor1().isPresent()) {
-			executeRegulatedMotorAction(motors.getRegulatedMotor1().get(), acceleration, speed, rotation);
+			executeRegulatedMotorAction(motors.getRegulatedMotor1().get(), acceleration, speed, rotation1);
 		}
 		
-		if(motors.getRegulatedMotor2().isPresent()) {
-			executeRegulatedMotorAction(motors.getRegulatedMotor2().get(), acceleration, speed, rotation);
+		if(!synch && motors.getRegulatedMotor2().isPresent()) {
+			executeRegulatedMotorAction(motors.getRegulatedMotor2().get(), acceleration, speed, rotation2);
 		}
 		
 		if(synch) {

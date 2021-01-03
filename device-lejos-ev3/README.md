@@ -29,15 +29,29 @@ Lego will be a receiving device for anything broadcasted by google home (need to
 1. Connection is via PAN of bluetooth. But possible too via TCP/IP
 Command is broken to:
 
-AX:L:03602000900
-(Motor port 1,Motor port 2):(Motor Type):(4-rotation)(4-acceleration)(3-speed)
+```
+AX:L:036000002000900
+
+(Motor port 1,Motor port 2):(Motor Type):(4-rotation motor 1)(4-rotation motor 2)(4-acceleration)(3-speed)
+```
+
 Motor port = A to D for ports, X as none. E.g. AX = port a for single motor only.
-Motor type = U is unregulated motor, L is Regulated Large motor, M is Regulated Medium motor
-rotation = supports from -999 to 9999 for regulated motors.
+
+Motor type = U is unregulated motor(see below), L is Regulated Large motor, M is Regulated Medium motor
+
+rotation1 = supports from -999 to 9999 for regulated motors.
+
+rotation2 = supports from -999 to 9999 for regulated motors.
+
 acceleration = support from 0000 to 6000 for regulated motors. Set to 0 to use default.
+
 speed = support from 000 to 900 for regulated motors. set to 0 to use default.
 
+```
 AX:U:050000000000
-(Motor port 1,none):(U:(4-power)(3-time in seconds)(4-dumped)
+(Motor port 1,none):U:(4-power)(3-time in seconds)(8-dumped)
+```
+
 power = supports from -100 to 0100 for unregulated motors. - is backward, + is forward
+
 time = supports from 0 to 999 in seconds
