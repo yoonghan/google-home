@@ -31,6 +31,7 @@ Command is broken to:
 
 ```
 AX:L:036000002000900
+String.format("AX:L:%04d%04d%04d%03d",-360,0,2000,900)
 
 (Motor port 1,Motor port 2):(Motor Type):(4-rotation motor 1)(4-rotation motor 2)(4-acceleration)(3-speed)
 ```
@@ -48,7 +49,9 @@ acceleration = support from 0000 to 6000 for regulated motors. Set to 0 to use d
 speed = support from 000 to 900 for regulated motors. set to 0 to use default.
 
 ```
-AX:U:050000000000
+AX:U:-05000100000000
+String.format("AX:L:%04d%03d00000000",-50,1)
+
 (Motor port 1,none):U:(4-power)(3-time in seconds)(8-dumped)
 ```
 
