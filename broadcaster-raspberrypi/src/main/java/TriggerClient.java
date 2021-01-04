@@ -23,8 +23,8 @@ public class TriggerClient {
       out.write("CX:U:"+getMovement(-50,10,0,0));
       out.write("AB:L:"+getMovement(-180,-180,0,0));
 
-
-      out.write("AB:L:018001800000000");
+/*
+      out.write("AB:L:018001800000000");"
       out.write("CX:U:005000100000000");//close arm
       out.write("AB:L:0805-8050000000");
       out.write("AB:L:290029000000900");
@@ -32,6 +32,7 @@ public class TriggerClient {
       out.write("AB:L:-180-1800000900");
       out.write("CX:U:-05000100000000");//open arm
       out.write("AB:L:-360-3600000000");
+*/
 
 		    out.flush();
 		    
