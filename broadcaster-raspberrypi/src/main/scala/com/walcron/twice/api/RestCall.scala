@@ -18,8 +18,8 @@ class RestCall(url:String) {
 
     val request = HttpRequest(
       method = HttpMethods.POST,
-      uri = s"""${url}/api/api/trigger""",
-      entity = HttpEntity(ContentTypes.`application/json`, mapper.writeValueAsString(action)),
+      uri = s"""${url}/api/trigger""",
+      entity = HttpEntity(ContentTypes.`application/json`, action),
       headers = Seq()
     )
 

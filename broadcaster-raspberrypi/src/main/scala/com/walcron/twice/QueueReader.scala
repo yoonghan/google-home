@@ -70,10 +70,12 @@ class QueueReader(applicationSetting: ApplicationSetting, brokers: String, usern
               proxyAndCallUrl.triggerRest( actionValue )
             }
             case 5 => {
-              lazy val lejosCall = new LejosCall(applicationSetting.lejosUrl, applicationSetting.lejosPort)
+              //lazy val lejosCall = new LejosCall(applicationSetting.lejosUrl, applicationSetting.lejosPort)
+              lazy val proxyAndCallUrl = new RestCall(applicationSetting.restUrl)
 
               if(homeAction.on.isDefined) {
-                lejosCall.triggerDevice(homeAction.on.get)
+                //lejosCall.triggerDevice(homeAction.on.get)
+                proxyAndCallUrl.triggerRest( actionValue )
               }
             }
             case _ => {}
