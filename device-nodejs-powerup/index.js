@@ -1,6 +1,6 @@
 var express = require('express');
-//const PoweredUP = require("node-poweredup");
-//const poweredUP = new PoweredUP.PoweredUP();
+const PoweredUP = require("node-poweredup");
+const poweredUP = new PoweredUP.PoweredUP();
 const lego = require("./lego");
 
 var app = express();
@@ -23,13 +23,15 @@ app.post('/api/trigger', (req, res) => {
 });
 
 app.post('/api/trigger/complete', (req, res) => {
-  console.log("Received")
-  shouldRun = true
+  console.log("Received:",req.body)
+  if(req.body.message && req.body.message.endsWith("0")) {
+    shouldRun = true
+  }
   return res.status(204).send()
 });
 
 app.listen(serverPort, function() {
-  /*poweredUP.on("discover", async (hub) => { // Wait to discover a Hub
+  poweredUP.on("discover", async (hub) => { // Wait to discover a Hub
     console.log(`Discovered ${hub.name}!`);
     await hub.connect(); // Connect to the Hub
     const motorA = await hub.waitForDeviceAtPort("A"); // Make sure a motor is plugged into port A
@@ -47,7 +49,7 @@ app.listen(serverPort, function() {
     }
   });
 
-  poweredUP.scan(); // Start scanning for Hubs*/
+  poweredUP.scan(); // Start scanning for Hubs
 
   console.log(`Server listening at http://${serverHost}:${serverPort}, and run as ROOT!!`);
 });

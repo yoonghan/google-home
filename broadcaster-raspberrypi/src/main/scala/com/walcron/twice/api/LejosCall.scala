@@ -18,6 +18,7 @@ class LejosCall(ipAddress: String, port: Int) {
       out.write(createRegulatedMovement("AB","L",2900,2900,0,900))
       out.write(createUnregulatedMovement("CX",-50,1))//close
       out.write(createRegulatedMovement("AB","L",-180,-180,0,0))
+      out.write(triggerAcknowledgement("000000000000"))
     }
     else {
       out.write(createRegulatedMovement("AB","L",180,180,0,0))
@@ -28,6 +29,7 @@ class LejosCall(ipAddress: String, port: Int) {
       out.write(createRegulatedMovement("AB","L",-180,-180,0,0))
       out.write(createUnregulatedMovement("CX",-50,1))
       out.write(createRegulatedMovement("AB","L",360,360,0,0))
+      out.write(triggerAcknowledgement("000000000001"))
     }
 
     out.flush
@@ -41,6 +43,10 @@ class LejosCall(ipAddress: String, port: Int) {
 
   def createUnregulatedMovement(motors:String, power:Int, delay:Int):String = {
     String.format("%s:U:%04d%03d00000000",motors,power,delay)
+  }
+
+  def triggerAcknowledgement(command:String):String = {
+    String.format("XX:X:ACK%s", command)
   }
 
   def stop(): Unit = {
