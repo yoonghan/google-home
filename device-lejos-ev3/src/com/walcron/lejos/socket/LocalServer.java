@@ -6,8 +6,8 @@ import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import com.walcron.lejos.motors.CommandExecutor;
-import com.walcron.lejos.motors.CommandMailbox;
+import com.walcron.lejos.command.CommandExecutor;
+import com.walcron.lejos.command.CommandMailbox;
 
 public class LocalServer extends Thread {
 
@@ -50,7 +50,14 @@ public class LocalServer extends Thread {
 						}
 					};
 
-					new Thread(clientListener).start();
+					//Make that only after connection is closed, the next request can be made.
+					Thread clientThread = new Thread(clientListener);
+					clientThread.start();
+					try {
+						clientThread.join();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
 				catch(IOException ioe) {
 					ioe.printStackTrace();

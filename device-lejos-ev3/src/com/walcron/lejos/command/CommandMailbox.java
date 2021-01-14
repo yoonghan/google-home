@@ -1,4 +1,4 @@
-package com.walcron.lejos.motors;
+package com.walcron.lejos.command;
 
 import java.util.LinkedList;
 import java.util.Optional;

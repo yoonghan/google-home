@@ -4,12 +4,12 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 
-public class TriggerClient {
+public class TestTriggerClient {
 
 	private final int PORT = 9000;
 	private final String HOST_NAME = "10.0.1.1";
 	
-	public TriggerClient() {
+	public TestTriggerClient() {
 		try (
 		    Socket clientSocket = new Socket(HOST_NAME, PORT);
 			PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
@@ -26,7 +26,13 @@ public class TriggerClient {
 		    //Only allow motor 1, rotation is replaced as power, positive forward, negative backward.
 			out.write("CX:U:-05000100000000");
 			out.write("CX:U:005000100000000");
+			
+			//Wait
+			out.write("XX:X:S00010000000000");
 		    
+			//Send http connection
+			out.write("XX:X:ACK000000000000");
+			
 		    out.flush();
 		    
 		    System.out.println("Completed");
@@ -37,6 +43,6 @@ public class TriggerClient {
 	}
 
 	public static void main(String args[]) {
-		new TriggerClient();
+		new TestTriggerClient();
 	}
 }

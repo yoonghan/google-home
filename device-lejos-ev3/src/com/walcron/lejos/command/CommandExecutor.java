@@ -1,7 +1,9 @@
-package com.walcron.lejos.motors;
+package com.walcron.lejos.command;
 
 import java.util.Optional;
 
+import com.walcron.lejos.api.Const;
+import com.walcron.lejos.api.JsonHttpClient;
 import com.walcron.lejos.motors.bean.CommandBean;
 import com.walcron.lejos.motors.bean.PortsBean;
 import com.walcron.lejos.motors.bean.MotorsBean;
@@ -18,8 +20,10 @@ public class CommandExecutor extends Thread {
 	public static final int LENGTH_OF_COMMAND = 20; //i.e. "AX:L:036000001000100"
 	private final long RUNNING_INSTANCE = 1000;
 	private volatile boolean running = true;
+	private final JsonHttpClient jsonHttpClient;
 	
 	public CommandExecutor() {
+		this.jsonHttpClient = new JsonHttpClient();
 	}
 	
 	public void run() {
@@ -28,7 +32,7 @@ public class CommandExecutor extends Thread {
 			if(_command.isPresent()) {
 				String command = _command.get();
 				System.out.println("Executing:"+command);
-				translateToMotorCall(command);
+				translateToCommandCall(command);
 			}
 			
 			try {
@@ -41,7 +45,7 @@ public class CommandExecutor extends Thread {
 		}
 	}
 	
-	public void translateToMotorCall(String command) {
+	public void translateToCommandCall(String command) {
 		String[] splittedCommand = command.split(":");
 		
 		if(splittedCommand.length == 3 && 
@@ -66,12 +70,37 @@ public class CommandExecutor extends Thread {
 				
 				doMotorClose(motors);
 			}
+			else {
+				doNonMotorCommand(translatedCommand);
+			}
 		}
 		else {
 			System.err.println("Check length");
 		}
 	}
 	
+	private void doNonMotorCommand(CommandBean translatedCommand) {
+		String action = translatedCommand.getAction(); 
+		
+		if(action.startsWith("S")) {
+			long waitTime = Long.parseLong(action.substring(1, 7));
+			System.out.println("WAIT:"+waitTime);
+			try {
+				Thread.sleep(waitTime);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			System.out.println("DONE");
+		}
+		
+		if(action.startsWith("ACK")) {
+			String message = action.substring(3);
+			System.out.println("ACK-"+Const.URL);
+			System.out.println("MSG-"+message);
+			jsonHttpClient.sendAck(message);
+		}
+	}
+
 	private void doUnregulatedMotorAction(String action, MotorsBean motors) {
 		//first 4, -100 to 0100
 		int power = Integer.parseInt(action.substring(0, 4), 10);

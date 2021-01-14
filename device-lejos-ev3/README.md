@@ -27,7 +27,10 @@ Lego will be a receiving device for anything broadcasted by google home (need to
 
 ### Commands
 1. Connection is via PAN of bluetooth. But possible too via TCP/IP
-Command is broken to:
+2. Client connections MUST close, before the next request can come in. This is to ensure synchronized request is ran by the motor.
+3. Command is broken to:
+
+*1. Connected to regulated motors *
 
 ```
 AX:L:036000002000900
@@ -48,6 +51,8 @@ acceleration = support from 0000 to 6000 for regulated motors. Set to 0 to use d
 
 speed = support from 000 to 900 for regulated motors. set to 0 to use default.
 
+*2. Connected to unregulated motors*
+
 ```
 AX:U:-05000100000000
 String.format("AX:L:%04d%03d00000000",-50,1)
@@ -58,3 +63,23 @@ String.format("AX:L:%04d%03d00000000",-50,1)
 power = supports from -100 to 0100 for unregulated motors. - is backward, + is forward
 
 time = supports from 0 to 999 in seconds
+
+*3. URL connection *
+
+```
+XX:X:00000000000000
+String.format("XX:X:ACK000000000000")
+```
+Useful to send acknowledgement to servers that the motors are completed. This function only sends application/json with "status":"done" and does not expect any responses (use HttpStatus 204).
+
+URL - hardcoded in Const file
+METHOD - hardcoded in Const file
+message -  000000000000, can send a-z, e.g. ACKHI THERE0000000. But must fulfill 15-3=12 characters.
+
+*4. Sleep *
+
+```
+XX:X:S00100000000000
+String.format("XX:X:S%06d00000000",1000)
+```
+Make machine sleep and not do anything in miliseconds.

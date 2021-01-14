@@ -1,4 +1,4 @@
-import com.walcron.lejos.motors.CommandExecutor;
+import com.walcron.lejos.command.CommandExecutor;
 import com.walcron.lejos.socket.LocalServer;
 
 import lejos.hardware.Button;
